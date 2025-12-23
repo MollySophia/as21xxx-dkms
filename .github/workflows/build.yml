@@ -1,0 +1,122 @@
+name: Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  # packaging-debian:
+  #   runs-on: ubuntu-24.04-arm
+  #   steps:
+  #   - name: Install Dependencies
+  #     run: |
+  #       sudo apt-get update
+  #       sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential devscripts dh-make dh-dkms dkms
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
+  #     with:
+  #       path: as21xxx-dkms
+  #   - name: Packaging
+  #     working-directory: as21xxx-dkms
+  #     run: |
+  #       LATEST_VERSION=$(grep "^PACKAGE_VERSION" "dkms.conf" | sed 's/.*\?"\([^"]*\)".*/\1/')
+  #       sed -i "s/###LATEST_VERSION###/$LATEST_VERSION/g" debian/control debian/changelog
+  #       dpkg-buildpackage -b -tc -us -uc
+  #   - name: Upload artifact
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: debain-package
+  #       path: "*.deb"
+
+  test-archlinux-lts:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+    - name: Install Dependencies
+      run: |
+        pacman-key --init
+        pacman -Syu --noconfirm --needed git linux-lts linux-lts-headers
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        path: as21xxx-dkms
+    - name: Build Module
+      working-directory: as21xxx-dkms
+      run: |
+        KERNEL_SOURCE_DIR=$(pacman -Qql linux-lts-headers | grep -m 1 -Eo ".*/lib/modules/[^/]+/build")
+        KERNELRELEASE=$(echo -n "$KERNEL_SOURCE_DIR" | sed 's/.*\/lib\/modules\///g;s/\/build//')
+        make -j$(nproc) KERNELRELEASE=$KERNELRELEASE -C $KERNEL_SOURCE_DIR M=$(pwd)/drivers/net/phy \
+          CONFIG_AS21XXX_PHY=m 
+
+  test-archlinux-lts66:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+    - name: Install Dependencies
+      run: |
+        pacman-key --init
+        cat <<EOF >> /etc/pacman.conf
+        [renegade-project]
+        Server = https://mirror.renegade-project.tech/arch/\$arch
+        SigLevel = Never
+        EOF
+        pacman -Syu --noconfirm --needed git linux-lts66 linux-lts66-headers
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        path: as21xxx-dkms
+    - name: Build Module
+      working-directory: as21xxx-dkms
+      run: |
+        KERNEL_SOURCE_DIR=$(pacman -Qql linux-lts66-headers | grep -m 1 -Eo ".*/lib/modules/[^/]+/build")
+        KERNELRELEASE=$(echo -n "$KERNEL_SOURCE_DIR" | sed 's/.*\/lib\/modules\///g;s/\/build//')
+        make -j$(nproc) KERNELRELEASE=$KERNELRELEASE -C $KERNEL_SOURCE_DIR M=$(pwd)/drivers/net/phy \
+          CONFIG_AS21XXX_PHY=m
+
+  test-archlinux-lts61:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+    - name: Install Dependencies
+      run: |
+        pacman-key --init
+        cat <<EOF >> /etc/pacman.conf
+        [renegade-project]
+        Server = https://mirror.renegade-project.tech/arch/\$arch
+        SigLevel = Never
+        EOF
+        pacman -Syu --noconfirm --needed git linux-lts61 linux-lts61-headers
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        path: as21xxx-dkms
+    - name: Build Module
+      working-directory: as21xxx-dkms
+      run: |
+        KERNEL_SOURCE_DIR=$(pacman -Qql linux-lts61-headers | grep -m 1 -Eo ".*/lib/modules/[^/]+/build")
+        KERNELRELEASE=$(echo -n "$KERNEL_SOURCE_DIR" | sed 's/.*\/lib\/modules\///g;s/\/build//')
+        make -j$(nproc) KERNELRELEASE=$KERNELRELEASE -C $KERNEL_SOURCE_DIR M=$(pwd)/drivers/net/phy \
+          CONFIG_AS21XXX_PHY=m
+
+  test-archlinux:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+    - name: Install Dependencies
+      run: |
+        pacman-key --init
+        pacman -Syu --noconfirm --needed git linux linux-headers
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        path: as21xxx-dkms
+    - name: Build Module
+      working-directory: as21xxx-dkms
+      run: |
+        KERNEL_SOURCE_DIR=$(pacman -Qql linux-headers | grep -m 1 -Eo ".*/lib/modules/[^/]+/build")
+        KERNELRELEASE=$(echo -n "$KERNEL_SOURCE_DIR" | sed 's/.*\/lib\/modules\///g;s/\/build//')
+        make -j$(nproc) KERNELRELEASE=$KERNELRELEASE -C $KERNEL_SOURCE_DIR M=$(pwd)/drivers/net/phy \
+          CONFIG_AS21XXX_PHY=m
