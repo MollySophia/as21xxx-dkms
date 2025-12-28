@@ -1013,6 +1013,18 @@ static inline bool phy_id_compare(u32 id1, u32 id2, u32 mask)
 }
 #endif
 
+static const u32 as21xxx_phy_ids[] = {
+	PHY_ID_AS21011JB1,
+	PHY_ID_AS21011PB1,
+	PHY_ID_AS21010JB1,
+	PHY_ID_AS21010PB1,
+	PHY_ID_AS21511JB1,
+	PHY_ID_AS21511PB1,
+	PHY_ID_AS21510JB1,
+	PHY_ID_AS21510PB1,
+	PHY_ID_AS21210JB1,
+	PHY_ID_AS21210PB1,
+};
 static int as21xxx_match_phy_device(struct phy_device *phydev)
 #endif
 {
@@ -1027,18 +1039,13 @@ static int as21xxx_match_phy_device(struct phy_device *phydev)
 		return genphy_match_phy_device(phydev, phydrv);
 #else
 		{
-			const int num_ids = ARRAY_SIZE(phydev->c45_ids.device_ids);
-			int i;
-			for (i = 1; i < num_ids; i++) {
-				if (phydev->c45_ids.device_ids[i] == 0xffffffff)
-					continue;
-	
-				for (j = 0; j < ARRAY_SIZE(as21xxx_drivers); j++) {
-					if (phy_id_compare(phydev->c45_ids.device_ids[i],
-						as21xxx_drivers[j].phy_id, as21xxx_drivers[j].phy_id_mask))
-						return 1;
-				}
+			const int num_ids = ARRAY_SIZE(as21xxx_phy_ids);
+			int i, j;
+			for (i = 0; i < num_ids; i++) {
+				if (phy_id_compare(phy_id, as21xxx_phy_ids[i], as21xxx_phy_ids[i]))
+					return 1;
 			}
+			return 0;
 		}
 #endif
 
@@ -1061,10 +1068,10 @@ static int as21xxx_match_phy_device(struct phy_device *phydev)
 		return phy_id == phydrv->phy_id;
 #else
 		{
-			const int num_ids = ARRAY_SIZE(as21xxx_drivers);
+			const int num_ids = ARRAY_SIZE(as21xxx_phy_ids);
 			int i;
 			for (i = 0; i < num_ids; i++) {
-				if (phy_id_compare(phy_id, as21xxx_drivers[i].phy_id, as21xxx_drivers[i].phy_id_mask))
+				if (phy_id_compare(phy_id, as21xxx_phy_ids[i], as21xxx_phy_ids[i]))
 					return 1;
 			}
 			return 0;
