@@ -12,6 +12,21 @@
 #include <linux/phy.h>
 #include <linux/version.h>
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 3, 0)
+#define __BF_CHECK_POW2(n)	BUILD_BUG_ON_ZERO(((n) & ((n) - 1)) != 0)
+#define FIELD_PREP_CONST(_mask, _val)					\
+	(								\
+		/* mask must be non-zero */				\
+		BUILD_BUG_ON_ZERO((_mask) == 0) +			\
+		/* check if value fits */				\
+		BUILD_BUG_ON_ZERO(~((_mask) >> __bf_shf(_mask)) & (_val)) + \
+		/* check if mask is contiguous */			\
+		__BF_CHECK_POW2((_mask) + (1ULL << __bf_shf(_mask))) +	\
+		/* and create the value */				\
+		(((typeof(_mask))(_val) << __bf_shf(_mask)) & (_mask))	\
+	)
+#endif
+
 #define VEND1_GLB_REG_CPU_RESET_ADDR_LO_BASEADDR 0x3
 #define VEND1_GLB_REG_CPU_RESET_ADDR_HI_BASEADDR 0x4
 
@@ -990,6 +1005,14 @@ static int as21xxx_led_polarity_set(struct phy_device *phydev, int index,
 static int as21xxx_match_phy_device(struct phy_device *phydev,
 				    const struct phy_driver *phydrv)
 #else
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 5, 0)
+static inline bool phy_id_compare(u32 id1, u32 id2, u32 mask)
+{
+	return !((id1 ^ id2) & mask);
+}
+#endif
+
 static int genphy_match_phy_device(struct phy_device *phydev,
 			    const struct phy_driver *phydrv)
 {
