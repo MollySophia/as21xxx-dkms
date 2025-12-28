@@ -675,7 +675,7 @@ static int as21xxx_probe(struct phy_device *phydev)
 			       VEND1_PTP_CLK_EN);
 
 	if (!enable_rate_adaptation || ret)
-		return ret
+		return ret;
 
 	return aeon_dpc_ra_enable(phydev);
 }
