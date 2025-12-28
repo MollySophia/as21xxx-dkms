@@ -635,21 +635,16 @@ static int as21xxx_get_features(struct phy_device *phydev)
 		return ret;
 
 	/* AS21xxx supports 100M/1G/2.5G/5G/10G speed. */
-	linkmode_clear_bit(ETHTOOL_LINK_MODE_10baseT_Half_BIT,
-			   phydev->supported);
-	linkmode_clear_bit(ETHTOOL_LINK_MODE_10baseT_Full_BIT,
-			   phydev->supported);
-	linkmode_clear_bit(ETHTOOL_LINK_MODE_100baseT_Half_BIT,
-			   phydev->supported);
-	linkmode_clear_bit(ETHTOOL_LINK_MODE_100baseT_Full_BIT,
-			   phydev->supported);
-	linkmode_clear_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT,
-			   phydev->supported);
-
-	// linkmode_set_bit(ETHTOOL_LINK_MODE_100baseT_Full_BIT,
-	// 		 phydev->supported);
-	// linkmode_set_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT,
-	// 		 phydev->supported);
+	// linkmode_clear_bit(ETHTOOL_LINK_MODE_10baseT_Half_BIT,
+	// 		   phydev->supported);
+	// linkmode_clear_bit(ETHTOOL_LINK_MODE_10baseT_Full_BIT,
+	// 		   phydev->supported);
+	// linkmode_clear_bit(ETHTOOL_LINK_MODE_100baseT_Half_BIT,
+	// 		   phydev->supported);
+	linkmode_set_bit(ETHTOOL_LINK_MODE_100baseT_Full_BIT,
+			 phydev->supported);
+	linkmode_set_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT,
+			 phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_2500baseT_Full_BIT,
 			 phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_5000baseT_Full_BIT,
@@ -658,8 +653,8 @@ static int as21xxx_get_features(struct phy_device *phydev)
 			 phydev->supported);
 	
 	linkmode_set_bit(ETHTOOL_LINK_MODE_Autoneg_BIT, phydev->supported);
-	linkmode_set_bit(ETHTOOL_LINK_MODE_TP_BIT, phydev->supported);
-	linkmode_set_bit(ETHTOOL_LINK_MODE_MII_BIT, phydev->supported);
+	// linkmode_set_bit(ETHTOOL_LINK_MODE_TP_BIT, phydev->supported);
+	// linkmode_set_bit(ETHTOOL_LINK_MODE_MII_BIT, phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_Pause_BIT, phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_Asym_Pause_BIT, phydev->supported);
 
@@ -1018,29 +1013,6 @@ static inline bool phy_id_compare(u32 id1, u32 id2, u32 mask)
 }
 #endif
 
-static int genphy_match_phy_device(struct phy_device *phydev,
-			    const struct phy_driver *phydrv)
-{
-	if (phydev->is_c45) {
-		const int num_ids = ARRAY_SIZE(phydev->c45_ids.device_ids);
-		int i;
-
-		for (i = 1; i < num_ids; i++) {
-			if (phydev->c45_ids.device_ids[i] == 0xffffffff)
-				continue;
-
-			if (phy_id_compare(phydev->c45_ids.device_ids[i],
-					   phydrv->phy_id, phydrv->phy_id_mask))
-				return 1;
-		}
-
-		return 0;
-	}
-
-	return phy_id_compare(phydev->phy_id, phydrv->phy_id,
-			      phydrv->phy_id_mask);
-}
-
 static int as21xxx_match_phy_device(struct phy_device *phydev)
 #endif
 {
@@ -1054,7 +1026,20 @@ static int as21xxx_match_phy_device(struct phy_device *phydev)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		return genphy_match_phy_device(phydev, phydrv);
 #else
-		return genphy_match_phy_device(phydev, phydev->drv);
+		{
+			const int num_ids = ARRAY_SIZE(phydev->c45_ids.device_ids);
+			int i;
+			for (i = 1; i < num_ids; i++) {
+				if (phydev->c45_ids.device_ids[i] == 0xffffffff)
+					continue;
+	
+				for (j = 0; j < ARRAY_SIZE(as21xxx_drivers); j++) {
+					if (phy_id_compare(phydev->c45_ids.device_ids[i],
+						as21xxx_drivers[j].phy_id, as21xxx_drivers[j].phy_id_mask))
+						return 1;
+				}
+			}
+		}
 #endif
 
 	/* Read PHY ID to handle firmware just loaded */
@@ -1075,7 +1060,15 @@ static int as21xxx_match_phy_device(struct phy_device *phydev)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		return phy_id == phydrv->phy_id;
 #else
-		return phy_id == phydev->drv->phy_id;
+		{
+			const int num_ids = ARRAY_SIZE(as21xxx_drivers);
+			int i;
+			for (i = 0; i < num_ids; i++) {
+				if (phy_id_compare(phy_id, as21xxx_drivers[i].phy_id, as21xxx_drivers[i].phy_id_mask))
+					return 1;
+			}
+			return 0;
+		}
 #endif
 
 	/* Allocate temp priv and load the firmware */
