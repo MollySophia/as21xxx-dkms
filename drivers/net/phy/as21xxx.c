@@ -197,6 +197,7 @@ struct as21xxx_priv {
 	struct mutex ipc_lock;
 };
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0) // TODO: LED functions for older kernels
 static struct as21xxx_led_pattern_info as21xxx_led_supported_pattern[] = {
 	{
 		.pattern = BIT(TRIGGER_NETDEV_LINK_10),
@@ -302,6 +303,7 @@ static struct as21xxx_led_pattern_info as21xxx_led_supported_pattern[] = {
 		.val = VEND1_LED_REG_A_EVENT_ON_NG_BLINK_ACT
 	}
 };
+#endif
 
 static int aeon_firmware_boot(struct phy_device *phydev, const u8 *data,
 			      size_t size)
@@ -871,6 +873,7 @@ static int as21xxx_read_status(struct phy_device *phydev)
 	return 0;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
 static int as21xxx_led_brightness_set(struct phy_device *phydev,
 				      u8 index, enum led_brightness value)
 {
@@ -981,6 +984,7 @@ static int as21xxx_led_polarity_set(struct phy_device *phydev, int index,
 			      VEND1_GLB_REG_CPU_CTRL,
 			      mask, val);
 }
+#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 static int as21xxx_match_phy_device(struct phy_device *phydev,
@@ -1101,11 +1105,13 @@ static struct phy_driver as21xxx_drivers[] = {
 		.match_phy_device = as21xxx_match_phy_device,
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
 		.led_brightness_set = as21xxx_led_brightness_set,
 		.led_hw_is_supported = as21xxx_led_hw_is_supported,
 		.led_hw_control_set = as21xxx_led_hw_control_set,
 		.led_hw_control_get = as21xxx_led_hw_control_get,
 		.led_polarity_set = as21xxx_led_polarity_set,
+#endif
 	},
 	{
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21011PB1),
@@ -1114,11 +1120,13 @@ static struct phy_driver as21xxx_drivers[] = {
 		.match_phy_device = as21xxx_match_phy_device,
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
 		.led_brightness_set = as21xxx_led_brightness_set,
 		.led_hw_is_supported = as21xxx_led_hw_is_supported,
 		.led_hw_control_set = as21xxx_led_hw_control_set,
 		.led_hw_control_get = as21xxx_led_hw_control_get,
 		.led_polarity_set = as21xxx_led_polarity_set,
+#endif
 	},
 	{
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21010PB1),
@@ -1127,11 +1135,13 @@ static struct phy_driver as21xxx_drivers[] = {
 		.match_phy_device = as21xxx_match_phy_device,
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
 		.led_brightness_set = as21xxx_led_brightness_set,
 		.led_hw_is_supported = as21xxx_led_hw_is_supported,
 		.led_hw_control_set = as21xxx_led_hw_control_set,
 		.led_hw_control_get = as21xxx_led_hw_control_get,
 		.led_polarity_set = as21xxx_led_polarity_set,
+#endif
 	},
 	{
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21010JB1),
@@ -1140,11 +1150,13 @@ static struct phy_driver as21xxx_drivers[] = {
 		.match_phy_device = as21xxx_match_phy_device,
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
 		.led_brightness_set = as21xxx_led_brightness_set,
 		.led_hw_is_supported = as21xxx_led_hw_is_supported,
 		.led_hw_control_set = as21xxx_led_hw_control_set,
 		.led_hw_control_get = as21xxx_led_hw_control_get,
 		.led_polarity_set = as21xxx_led_polarity_set,
+#endif
 	},
 	{
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21210PB1),
@@ -1153,11 +1165,13 @@ static struct phy_driver as21xxx_drivers[] = {
 		.match_phy_device = as21xxx_match_phy_device,
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
 		.led_brightness_set = as21xxx_led_brightness_set,
 		.led_hw_is_supported = as21xxx_led_hw_is_supported,
 		.led_hw_control_set = as21xxx_led_hw_control_set,
 		.led_hw_control_get = as21xxx_led_hw_control_get,
 		.led_polarity_set = as21xxx_led_polarity_set,
+#endif
 	},
 	{
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21510JB1),
@@ -1166,11 +1180,13 @@ static struct phy_driver as21xxx_drivers[] = {
 		.match_phy_device = as21xxx_match_phy_device,
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
 		.led_brightness_set = as21xxx_led_brightness_set,
 		.led_hw_is_supported = as21xxx_led_hw_is_supported,
 		.led_hw_control_set = as21xxx_led_hw_control_set,
 		.led_hw_control_get = as21xxx_led_hw_control_get,
 		.led_polarity_set = as21xxx_led_polarity_set,
+#endif
 	},
 	{
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21510PB1),
@@ -1179,11 +1195,13 @@ static struct phy_driver as21xxx_drivers[] = {
 		.match_phy_device = as21xxx_match_phy_device,
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
 		.led_brightness_set = as21xxx_led_brightness_set,
 		.led_hw_is_supported = as21xxx_led_hw_is_supported,
 		.led_hw_control_set = as21xxx_led_hw_control_set,
 		.led_hw_control_get = as21xxx_led_hw_control_get,
 		.led_polarity_set = as21xxx_led_polarity_set,
+#endif
 	},
 	{
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21511JB1),
@@ -1192,11 +1210,13 @@ static struct phy_driver as21xxx_drivers[] = {
 		.match_phy_device = as21xxx_match_phy_device,
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
 		.led_brightness_set = as21xxx_led_brightness_set,
 		.led_hw_is_supported = as21xxx_led_hw_is_supported,
 		.led_hw_control_set = as21xxx_led_hw_control_set,
 		.led_hw_control_get = as21xxx_led_hw_control_get,
 		.led_polarity_set = as21xxx_led_polarity_set,
+#endif
 	},
 	{
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21210JB1),
@@ -1205,11 +1225,13 @@ static struct phy_driver as21xxx_drivers[] = {
 		.match_phy_device = as21xxx_match_phy_device,
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
 		.led_brightness_set = as21xxx_led_brightness_set,
 		.led_hw_is_supported = as21xxx_led_hw_is_supported,
 		.led_hw_control_set = as21xxx_led_hw_control_set,
 		.led_hw_control_get = as21xxx_led_hw_control_get,
 		.led_polarity_set = as21xxx_led_polarity_set,
+#endif
 	},
 	{
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21511PB1),
@@ -1218,11 +1240,13 @@ static struct phy_driver as21xxx_drivers[] = {
 		.match_phy_device = as21xxx_match_phy_device,
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
 		.led_brightness_set = as21xxx_led_brightness_set,
 		.led_hw_is_supported = as21xxx_led_hw_is_supported,
 		.led_hw_control_set = as21xxx_led_hw_control_set,
 		.led_hw_control_get = as21xxx_led_hw_control_get,
 		.led_polarity_set = as21xxx_led_polarity_set,
+#endif
 	},
 };
 module_phy_driver(as21xxx_drivers);
