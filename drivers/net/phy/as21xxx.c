@@ -10,6 +10,7 @@
 #include <linux/module.h>
 #include <linux/of.h>
 #include <linux/phy.h>
+#include <linux/version.h>
 
 #define VEND1_GLB_REG_CPU_RESET_ADDR_LO_BASEADDR 0x3
 #define VEND1_GLB_REG_CPU_RESET_ADDR_HI_BASEADDR 0x4
@@ -961,9 +962,12 @@ static int as21xxx_led_polarity_set(struct phy_device *phydev, int index,
 		case PHY_LED_ACTIVE_LOW:
 			led_active_low = true;
 			break;
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		case PHY_LED_ACTIVE_HIGH: /* default mode */
 			led_active_low = false;
 			break;
+#endif
 		default:
 			return -EINVAL;
 		}
@@ -978,8 +982,35 @@ static int as21xxx_led_polarity_set(struct phy_device *phydev, int index,
 			      mask, val);
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 static int as21xxx_match_phy_device(struct phy_device *phydev,
 				    const struct phy_driver *phydrv)
+#else
+static int genphy_match_phy_device(struct phy_device *phydev,
+			    const struct phy_driver *phydrv)
+{
+	if (phydev->is_c45) {
+		const int num_ids = ARRAY_SIZE(phydev->c45_ids.device_ids);
+		int i;
+
+		for (i = 1; i < num_ids; i++) {
+			if (phydev->c45_ids.device_ids[i] == 0xffffffff)
+				continue;
+
+			if (phy_id_compare(phydev->c45_ids.device_ids[i],
+					   phydrv->phy_id, phydrv->phy_id_mask))
+				return 1;
+		}
+
+		return 0;
+	}
+
+	return phy_id_compare(phydev->phy_id, phydrv->phy_id,
+			      phydrv->phy_id_mask);
+}
+
+static int as21xxx_match_phy_device(struct phy_device *phydev)
+#endif
 {
 	struct as21xxx_priv *priv;
 	u16 ret_sts;
@@ -988,7 +1019,11 @@ static int as21xxx_match_phy_device(struct phy_device *phydev,
 
 	/* Skip PHY that are not AS21xxx or already have firmware loaded */
 	if (phydev->c45_ids.device_ids[MDIO_MMD_PCS] != PHY_ID_AS21XXX)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		return genphy_match_phy_device(phydev, phydrv);
+#else
+		return genphy_match_phy_device(phydev, phydev->drv);
+#endif
 
 	/* Read PHY ID to handle firmware just loaded */
 	ret = phy_read_mmd(phydev, MDIO_MMD_PCS, MII_PHYSID1);
@@ -1005,7 +1040,11 @@ static int as21xxx_match_phy_device(struct phy_device *phydev,
 	 * the firmware just loaded
 	 */
 	if (phy_id != PHY_ID_AS21XXX)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		return phy_id == phydrv->phy_id;
+#else
+		return phy_id == phydev->drv->phy_id;
+#endif
 
 	/* Allocate temp priv and load the firmware */
 	priv = kzalloc(sizeof(*priv), GFP_KERNEL);
