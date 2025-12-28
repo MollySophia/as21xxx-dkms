@@ -635,16 +635,21 @@ static int as21xxx_get_features(struct phy_device *phydev)
 		return ret;
 
 	/* AS21xxx supports 100M/1G/2.5G/5G/10G speed. */
-	// linkmode_clear_bit(ETHTOOL_LINK_MODE_10baseT_Half_BIT,
-	// 		   phydev->supported);
-	// linkmode_clear_bit(ETHTOOL_LINK_MODE_10baseT_Full_BIT,
-	// 		   phydev->supported);
-	// linkmode_clear_bit(ETHTOOL_LINK_MODE_100baseT_Half_BIT,
-	// 		   phydev->supported);
-	linkmode_set_bit(ETHTOOL_LINK_MODE_100baseT_Full_BIT,
-			 phydev->supported);
-	linkmode_set_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT,
-			 phydev->supported);
+	linkmode_clear_bit(ETHTOOL_LINK_MODE_10baseT_Half_BIT,
+			   phydev->supported);
+	linkmode_clear_bit(ETHTOOL_LINK_MODE_10baseT_Full_BIT,
+			   phydev->supported);
+	linkmode_clear_bit(ETHTOOL_LINK_MODE_100baseT_Half_BIT,
+			   phydev->supported);
+	linkmode_clear_bit(ETHTOOL_LINK_MODE_100baseT_Full_BIT,
+			   phydev->supported);
+	linkmode_clear_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT,
+			   phydev->supported);
+
+	// linkmode_set_bit(ETHTOOL_LINK_MODE_100baseT_Full_BIT,
+	// 		 phydev->supported);
+	// linkmode_set_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT,
+	// 		 phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_2500baseT_Full_BIT,
 			 phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_5000baseT_Full_BIT,
@@ -653,8 +658,8 @@ static int as21xxx_get_features(struct phy_device *phydev)
 			 phydev->supported);
 	
 	linkmode_set_bit(ETHTOOL_LINK_MODE_Autoneg_BIT, phydev->supported);
-	// linkmode_set_bit(ETHTOOL_LINK_MODE_TP_BIT, phydev->supported);
-	// linkmode_set_bit(ETHTOOL_LINK_MODE_MII_BIT, phydev->supported);
+	linkmode_set_bit(ETHTOOL_LINK_MODE_TP_BIT, phydev->supported);
+	linkmode_set_bit(ETHTOOL_LINK_MODE_MII_BIT, phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_Pause_BIT, phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_Asym_Pause_BIT, phydev->supported);
 
