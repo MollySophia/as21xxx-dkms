@@ -635,26 +635,30 @@ static int as21xxx_get_features(struct phy_device *phydev)
 		return ret;
 
 	/* AS21xxx supports 100M/1G/2.5G/5G/10G speed. */
-	// linkmode_clear_bit(ETHTOOL_LINK_MODE_10baseT_Half_BIT,
-	// 		   phydev->supported);
-	// linkmode_clear_bit(ETHTOOL_LINK_MODE_10baseT_Full_BIT,
-	// 		   phydev->supported);
-	// linkmode_clear_bit(ETHTOOL_LINK_MODE_100baseT_Half_BIT,
-	// 		   phydev->supported);
-	linkmode_set_bit(ETHTOOL_LINK_MODE_100baseT_Full_BIT,
-			 phydev->supported);
-	linkmode_set_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT,
-			 phydev->supported);
+	linkmode_clear_bit(ETHTOOL_LINK_MODE_10baseT_Half_BIT,
+			   phydev->supported);
+	linkmode_clear_bit(ETHTOOL_LINK_MODE_10baseT_Full_BIT,
+			   phydev->supported);
+	linkmode_clear_bit(ETHTOOL_LINK_MODE_100baseT_Half_BIT,
+			   phydev->supported);
+	linkmode_clear_bit(ETHTOOL_LINK_MODE_100baseT_Full_BIT,
+				phydev->supported);
+	linkmode_clear_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT,
+				phydev->supported);
+	// linkmode_set_bit(ETHTOOL_LINK_MODE_100baseT_Full_BIT,
+	// 		 phydev->supported);
+	// linkmode_set_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT,
+	// 		 phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_2500baseT_Full_BIT,
 			 phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_5000baseT_Full_BIT,
 			 phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_10000baseT_Full_BIT,
 			 phydev->supported);
-	
+
 	linkmode_set_bit(ETHTOOL_LINK_MODE_Autoneg_BIT, phydev->supported);
-	// linkmode_set_bit(ETHTOOL_LINK_MODE_TP_BIT, phydev->supported);
-	// linkmode_set_bit(ETHTOOL_LINK_MODE_MII_BIT, phydev->supported);
+	linkmode_set_bit(ETHTOOL_LINK_MODE_TP_BIT, phydev->supported);
+	linkmode_set_bit(ETHTOOL_LINK_MODE_MII_BIT, phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_Pause_BIT, phydev->supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_Asym_Pause_BIT, phydev->supported);
 
@@ -1006,25 +1010,143 @@ static int as21xxx_match_phy_device(struct phy_device *phydev,
 				    const struct phy_driver *phydrv)
 #else
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 5, 0)
-static inline bool phy_id_compare(u32 id1, u32 id2, u32 mask)
+static int as21xxx_read_phy_id(struct phy_device *phydev, u32 *phy_id)
 {
-	return !((id1 ^ id2) & mask);
-}
-#endif
+	int ret;
 
-static const u32 as21xxx_phy_ids[] = {
-	PHY_ID_AS21011JB1,
-	PHY_ID_AS21011PB1,
-	PHY_ID_AS21010JB1,
-	PHY_ID_AS21010PB1,
-	PHY_ID_AS21511JB1,
-	PHY_ID_AS21511PB1,
-	PHY_ID_AS21510JB1,
-	PHY_ID_AS21510PB1,
-	PHY_ID_AS21210JB1,
-	PHY_ID_AS21210PB1,
-};
+	ret = phy_read_mmd(phydev, MDIO_MMD_PCS, MII_PHYSID1);
+	if (ret < 0)
+		return ret;
+	*phy_id = ret << 16;
+
+	ret = phy_read_mmd(phydev, MDIO_MMD_PCS, MII_PHYSID2);
+	if (ret < 0)
+		return ret;
+	*phy_id |= ret;
+
+	return 0;
+}
+
+static int as21011jb1_match_phy_device(struct phy_device *phydev)
+{
+	u32 phy_id;
+	int ret;
+
+	ret = as21xxx_read_phy_id(phydev, &phy_id);
+	if (ret < 0)
+		return ret;
+
+	return phy_id == PHY_ID_AS21011JB1;
+}
+
+static int as21011pb1_match_phy_device(struct phy_device *phydev)
+{
+	u32 phy_id;
+	int ret;
+
+	ret = as21xxx_read_phy_id(phydev, &phy_id);
+	if (ret < 0)
+		return ret;
+
+	return phy_id == PHY_ID_AS21011PB1;
+}
+
+static int as21010jb1_match_phy_device(struct phy_device *phydev)
+{
+	u32 phy_id;
+	int ret;
+
+	ret = as21xxx_read_phy_id(phydev, &phy_id);
+	if (ret < 0)
+		return ret;
+
+	return phy_id == PHY_ID_AS21010JB1;
+}
+
+static int as21010pb1_match_phy_device(struct phy_device *phydev)
+{
+	u32 phy_id;
+	int ret;
+
+	ret = as21xxx_read_phy_id(phydev, &phy_id);
+	if (ret < 0)
+		return ret;
+
+	return phy_id == PHY_ID_AS21010PB1;
+}
+
+static int as21511jb1_match_phy_device(struct phy_device *phydev)
+{
+	u32 phy_id;
+	int ret;
+
+	ret = as21xxx_read_phy_id(phydev, &phy_id);
+	if (ret < 0)
+		return ret;
+
+	return phy_id == PHY_ID_AS21511JB1;
+}
+
+static int as21511pb1_match_phy_device(struct phy_device *phydev)
+{
+	u32 phy_id;
+	int ret;
+
+	ret = as21xxx_read_phy_id(phydev, &phy_id);
+	if (ret < 0)
+		return ret;
+
+	return phy_id == PHY_ID_AS21511PB1;
+}
+
+static int as21510jb1_match_phy_device(struct phy_device *phydev)
+{
+	u32 phy_id;
+	int ret;
+
+	ret = as21xxx_read_phy_id(phydev, &phy_id);
+	if (ret < 0)
+		return ret;
+
+	return phy_id == PHY_ID_AS21510JB1;
+}
+
+static int as21510pb1_match_phy_device(struct phy_device *phydev)
+{
+	u32 phy_id;
+	int ret;
+
+	ret = as21xxx_read_phy_id(phydev, &phy_id);
+	if (ret < 0)
+		return ret;
+
+	return phy_id == PHY_ID_AS21510PB1;
+}
+
+static int as21210jb1_match_phy_device(struct phy_device *phydev)
+{
+	u32 phy_id;
+	int ret;
+
+	ret = as21xxx_read_phy_id(phydev, &phy_id);
+	if (ret < 0)
+		return ret;
+
+	return phy_id == PHY_ID_AS21210JB1;
+}
+
+static int as21210pb1_match_phy_device(struct phy_device *phydev)
+{
+	u32 phy_id;
+	int ret;
+
+	ret = as21xxx_read_phy_id(phydev, &phy_id);
+	if (ret < 0)
+		return ret;
+
+	return phy_id == PHY_ID_AS21210PB1;
+}
+
 static int as21xxx_match_phy_device(struct phy_device *phydev)
 #endif
 {
@@ -1033,49 +1155,33 @@ static int as21xxx_match_phy_device(struct phy_device *phydev)
 	u32 phy_id;
 	int ret;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 	/* Skip PHY that are not AS21xxx or already have firmware loaded */
 	if (phydev->c45_ids.device_ids[MDIO_MMD_PCS] != PHY_ID_AS21XXX)
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		return genphy_match_phy_device(phydev, phydrv);
-#else
-		{
-			const int num_ids = ARRAY_SIZE(as21xxx_phy_ids);
-			int i, j;
-			for (i = 0; i < num_ids; i++) {
-				if (phy_id_compare(phy_id, as21xxx_phy_ids[i], as21xxx_phy_ids[i]))
-					return 1;
-			}
-			return 0;
-		}
 #endif
 
 	/* Read PHY ID to handle firmware just loaded */
-	ret = phy_read_mmd(phydev, MDIO_MMD_PCS, MII_PHYSID1);
+	ret = as21xxx_read_phy_id(phydev, &phy_id);
 	if (ret < 0)
 		return ret;
-	phy_id = ret << 16;
 
-	ret = phy_read_mmd(phydev, MDIO_MMD_PCS, MII_PHYSID2);
-	if (ret < 0)
-		return ret;
-	phy_id |= ret;
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 	/* With PHY ID not the generic AS21xxx one assume
 	 * the firmware just loaded
 	 */
 	if (phy_id != PHY_ID_AS21XXX)
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		return phy_id == phydrv->phy_id;
 #else
-		{
-			const int num_ids = ARRAY_SIZE(as21xxx_phy_ids);
-			int i;
-			for (i = 0; i < num_ids; i++) {
-				if (phy_id_compare(phy_id, as21xxx_phy_ids[i], as21xxx_phy_ids[i]))
-					return 1;
-			}
-			return 0;
-		}
+	/* For kernel < 6.16: If PHY ID is not the generic one,
+	 * firmware is already loaded, return 0 to let specific
+	 * driver match functions handle it
+	 */
+	if (phy_id != PHY_ID_AS21XXX) {
+		phydev_err(phydev, "PHY ID 0x%08x != generic 0x%08x, skipping firmware load\n",
+			   phy_id, PHY_ID_AS21XXX);
+		return 0;
+	}
 #endif
 
 	/* Allocate temp priv and load the firmware */
@@ -1130,7 +1236,11 @@ static struct phy_driver as21xxx_drivers[] = {
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21011JB1),
 		.name		= "Aeonsemi AS21011JB1",
 		.probe		= as21xxx_probe,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		.match_phy_device = as21xxx_match_phy_device,
+#else
+		.match_phy_device = as21011jb1_match_phy_device,
+#endif
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
@@ -1145,7 +1255,11 @@ static struct phy_driver as21xxx_drivers[] = {
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21011PB1),
 		.name		= "Aeonsemi AS21011PB1",
 		.probe		= as21xxx_probe,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		.match_phy_device = as21xxx_match_phy_device,
+#else
+		.match_phy_device = as21011pb1_match_phy_device,
+#endif
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
@@ -1160,7 +1274,11 @@ static struct phy_driver as21xxx_drivers[] = {
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21010PB1),
 		.name		= "Aeonsemi AS21010PB1",
 		.probe		= as21xxx_probe,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		.match_phy_device = as21xxx_match_phy_device,
+#else
+		.match_phy_device = as21010pb1_match_phy_device,
+#endif
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
@@ -1175,7 +1293,11 @@ static struct phy_driver as21xxx_drivers[] = {
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21010JB1),
 		.name		= "Aeonsemi AS21010JB1",
 		.probe		= as21xxx_probe,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		.match_phy_device = as21xxx_match_phy_device,
+#else
+		.match_phy_device = as21010jb1_match_phy_device,
+#endif
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
@@ -1190,7 +1312,11 @@ static struct phy_driver as21xxx_drivers[] = {
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21210PB1),
 		.name		= "Aeonsemi AS21210PB1",
 		.probe		= as21xxx_probe,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		.match_phy_device = as21xxx_match_phy_device,
+#else
+		.match_phy_device = as21210pb1_match_phy_device,
+#endif
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
@@ -1205,7 +1331,11 @@ static struct phy_driver as21xxx_drivers[] = {
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21510JB1),
 		.name		= "Aeonsemi AS21510JB1",
 		.probe		= as21xxx_probe,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		.match_phy_device = as21xxx_match_phy_device,
+#else
+		.match_phy_device = as21510jb1_match_phy_device,
+#endif
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
@@ -1220,7 +1350,11 @@ static struct phy_driver as21xxx_drivers[] = {
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21510PB1),
 		.name		= "Aeonsemi AS21510PB1",
 		.probe		= as21xxx_probe,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		.match_phy_device = as21xxx_match_phy_device,
+#else
+		.match_phy_device = as21510pb1_match_phy_device,
+#endif
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
@@ -1235,7 +1369,11 @@ static struct phy_driver as21xxx_drivers[] = {
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21511JB1),
 		.name		= "Aeonsemi AS21511JB1",
 		.probe		= as21xxx_probe,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		.match_phy_device = as21xxx_match_phy_device,
+#else
+		.match_phy_device = as21511jb1_match_phy_device,
+#endif
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
@@ -1250,7 +1388,11 @@ static struct phy_driver as21xxx_drivers[] = {
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21210JB1),
 		.name		= "Aeonsemi AS21210JB1",
 		.probe		= as21xxx_probe,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		.match_phy_device = as21xxx_match_phy_device,
+#else
+		.match_phy_device = as21210jb1_match_phy_device,
+#endif
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
@@ -1265,7 +1407,11 @@ static struct phy_driver as21xxx_drivers[] = {
 		PHY_ID_MATCH_EXACT(PHY_ID_AS21511PB1),
 		.name		= "Aeonsemi AS21511PB1",
 		.probe		= as21xxx_probe,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 		.match_phy_device = as21xxx_match_phy_device,
+#else
+		.match_phy_device = as21511pb1_match_phy_device,
+#endif
 		.read_status	= as21xxx_read_status,
 		.get_features	= as21xxx_get_features,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 0)
@@ -1279,10 +1425,17 @@ static struct phy_driver as21xxx_drivers[] = {
 };
 module_phy_driver(as21xxx_drivers);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
 static struct mdio_device_id __maybe_unused as21xxx_tbl[] = {
 	{ PHY_ID_MATCH_VENDOR(PHY_VENDOR_AEONSEMI) },
 	{ }
 };
+#else
+static struct mdio_device_id __maybe_unused as21xxx_tbl[] = {
+	{ PHY_ID_MATCH_VENDOR(PHY_VENDOR_AEONSEMI) },
+	{ }
+};
+#endif
 MODULE_DEVICE_TABLE(mdio, as21xxx_tbl);
 
 MODULE_DESCRIPTION("Aeonsemi AS21xxx PHY driver");
