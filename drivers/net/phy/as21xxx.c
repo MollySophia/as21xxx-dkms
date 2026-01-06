@@ -1005,11 +1005,6 @@ static int as21xxx_led_polarity_set(struct phy_device *phydev, int index,
 }
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
-static int as21xxx_match_phy_device(struct phy_device *phydev,
-				    const struct phy_driver *phydrv)
-#else
-
 static int as21xxx_read_phy_id(struct phy_device *phydev, u32 *phy_id)
 {
 	int ret;
@@ -1027,6 +1022,10 @@ static int as21xxx_read_phy_id(struct phy_device *phydev, u32 *phy_id)
 	return 0;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 0)
+static int as21xxx_match_phy_device(struct phy_device *phydev,
+				    const struct phy_driver *phydrv)
+#else
 static int as21011jb1_match_phy_device(struct phy_device *phydev)
 {
 	u32 phy_id;
