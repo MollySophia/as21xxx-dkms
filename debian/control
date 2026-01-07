@@ -1,0 +1,16 @@
+Source: as21xxx-dkms
+Section: kernel
+Priority: optional
+Maintainer: Molly Sophia <mollysophia379@gmail.com>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13), dh-sequence-dkms
+Standards-Version: ###LATEST_VERSION###
+Homepage: https://github.com/mollysophia/as21xxx-dkms
+
+Package: as21xxx-dkms
+Architecture: all
+Depends:
+ ${misc:Depends}, build-essential
+Description: Aeonsemi AS21xxx PHY Driver dkms package
+ This package provides the dkms source code for Aeonsemi AS21xxx PHY Driver.
